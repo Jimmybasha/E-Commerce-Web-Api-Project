@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Store.Apis.Errors;
 using Store.Repository.Data.Contexts;
 
 namespace Store.Apis.Controllers
@@ -13,7 +14,7 @@ namespace Store.Apis.Controllers
 
         public BuggyController(StoreDbContext context)
         {
-            this.context = context;
+            this.context = context;    
         }
 
 
@@ -22,7 +23,7 @@ namespace Store.Apis.Controllers
         {
             var product = await context.Products.FirstOrDefaultAsync(P=>P.Id==100);
 
-            if (product == null) return NotFound(new {Message="Product with id :100 is not found", StatusCode = StatusCodes.Status404NotFound });
+            if (product == null) return NotFound(new ApiErrorResponse(404 , "Product with id 100 isn't found"));
 
             return Ok(product);
 
@@ -45,7 +46,7 @@ namespace Store.Apis.Controllers
         public async Task<IActionResult> GetBadRequestError()
         {
          
-            return BadRequest();
+            return BadRequest( new ApiErrorResponse(400) );
 
         }
 
@@ -55,9 +56,7 @@ namespace Store.Apis.Controllers
         [HttpGet("badrequest/{id}")]
         public async Task<IActionResult> GetBadRequestError(int id)
         {
-
             return Ok();
-
         }
 
 
@@ -65,8 +64,8 @@ namespace Store.Apis.Controllers
         public async Task<IActionResult> GetUnAuthorizedError()
         {
 
-            return Unauthorized();
 
+            return Unauthorized(new ApiErrorResponse(401));
         }
 
 

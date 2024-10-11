@@ -1,6 +1,10 @@
 
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Store.Apis.Errors;
+using Store.Apis.MiddleWares;
 using Store.Core;
 using Store.Core.Mapping.Products;
 using Store.Core.Services.Contract;
@@ -34,6 +38,33 @@ namespace Store.Apis
             builder.Services.AddAutoMapper(M => M.AddProfile(new ProductProfile(builder.Configuration)));
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.Configure<ApiBehaviorOptions>((options) =>
+            {
+
+
+
+
+                options.InvalidModelStateResponseFactory = (actionContext) =>
+                {
+
+                    var errors = actionContext.ModelState.Where(p => p.Value.Errors.Count > 0)
+                                                        .SelectMany(p => p.Value.Errors)
+                                                        .Select(E => E.ErrorMessage)
+                                                        .ToArray();
+
+
+                    var res = new ApiValidationErrorResponse()
+                    {
+                        Errors = errors
+                    };
+
+                    return new BadRequestObjectResult(res);
+
+                };
+
+
+            });
+
 
             var app = builder.Build();
 
@@ -58,6 +89,9 @@ namespace Store.Apis
                 logger.LogError(ex, "There are problesm during migrations");
             }
 
+            //Configure The User Defined [ExceptionMiddleware] Middleware i've created to use the
+            //Configuration i've created
+            app.UseMiddleware<ExceptionMiddleware>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -65,7 +99,6 @@ namespace Store.Apis
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
 
             //To Allow using the static files sent in the wwwroot
             app.UseStaticFiles();
