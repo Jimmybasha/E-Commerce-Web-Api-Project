@@ -1,15 +1,17 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Store.Apis.Errors;
 using Store.Core;
+using Store.Core.Dtos.Products;
+using Store.Core.Helper;
 using Store.Core.Services.Contract;
 using Store.Core.Specifications.ProductSpecs;
 using Store.Service.Services.Products;
 
 namespace Store.Apis.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ProductsController : ControllerBase
+   
+    public class ProductsController : BaseApiController
     {
         private readonly IProductService productService;
 
@@ -18,18 +20,26 @@ namespace Store.Apis.Controllers
             this.productService = productService;
         }
 
+
+
+        [ProducesResponseType(typeof(ProductDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductById(int? id) // Endpoint
         {
-            if (id is null) return BadRequest("Invalid id");
+            if (id is null) return BadRequest(new ApiErrorResponse(StatusCodes.Status400BadRequest));
             var result = await productService.getProductByIdAsync(id.Value);
-            if (result is null) return NotFound($"The Product with id {id} not found at Db");
+            if (result is null) return NotFound(new ApiErrorResponse(StatusCodes.Status404NotFound));
             return Ok(result);
 
         }
 
+
+        [ProducesResponseType(typeof(PaginationResponse<ProductDto>), StatusCodes.Status200OK)]
         [HttpGet]
-        public async Task<IActionResult> GetAllProducts([FromQuery]ProductSpecParams productSpec) // Endpoint 
+        //sort :name,priceAsc,priceDesc
+        public async Task<ActionResult<PaginationResponse<ProductDto>>> GetAllProducts([FromQuery]ProductSpecParams productSpec) // Endpoint 
         { 
 
             var result = await productService.getAllProductsAsync(productSpec);
@@ -37,16 +47,21 @@ namespace Store.Apis.Controllers
 
         }
 
+
+
+        [ProducesResponseType(typeof(PaginationResponse<TypeBrandDto>), StatusCodes.Status200OK)]
         [HttpGet("types")]
-        public async Task<IActionResult> GetAllTypes() // Endpoint
+        public async Task<ActionResult<IEnumerable<TypeBrandDto>>> GetAllTypes() // Endpoint
         {
 
             var result = await productService.getAllTypesAsync();
             return Ok(result);
 
         }
+
+        [ProducesResponseType(typeof(PaginationResponse<TypeBrandDto>), StatusCodes.Status200OK)]
         [HttpGet("brands")]
-        public async Task<IActionResult> GetAllBrands() // Endpoint
+        public async Task<ActionResult<IEnumerable<TypeBrandDto>>> GetAllBrands() // Endpoint
         {
 
             var result = await productService.getAllBrandsAsync();
