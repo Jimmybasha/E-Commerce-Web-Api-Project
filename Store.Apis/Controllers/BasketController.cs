@@ -5,6 +5,8 @@ using Store.Apis.Errors;
 using Store.Core.Dtos.Basket;
 using Store.Core.Entities;
 using Store.Core.Repositories.Contract;
+using Store.Core.Services.Contract;
+using Store.Service.Services.Basket;
 
 namespace Store.Apis.Controllers
 {
@@ -12,33 +14,33 @@ namespace Store.Apis.Controllers
     [ApiController]
     public class BasketController : ControllerBase
     {
-        private readonly IBasketRepository basketRepository;
-        private readonly IMapper mapper;
+        private readonly IBasketServices basketServices;
 
-        public BasketController(IBasketRepository basketRepository,IMapper mapper)
+        public BasketController(IBasketServices basketServices)
         {
-            this.basketRepository = basketRepository;
-            this.mapper = mapper;
+            this.basketServices = basketServices;
         }
 
         [HttpGet] //Get: /api/Basket?basketId
-        public async Task<ActionResult<CustomerBasket>> GetBasket(string? basketId)
+        public async Task<IActionResult> GetBasket(string? basketId)
         {
-            if (basketId is null) return BadRequest(new ApiErrorResponse(StatusCodes.Status400BadRequest, "Invalid Id"));
 
-            var basket = await basketRepository.GetBasketAsync(basketId);
+            if (basketId is null)  return BadRequest(new ApiErrorResponse(StatusCodes.Status400BadRequest, "Invalid Id"));
 
-            if(basket is null) new CustomerBasket() { Id = basketId };
+            var basket = await basketServices.GetBasketAsync(basketId);
+
+            if(basket is null) NotFound(new ApiErrorResponse(StatusCodes.Status404NotFound));
 
             return Ok(basket);
+
         }
 
 
         [HttpPost]
-        public async Task<ActionResult<CustomerBasket>> CreateOrUpdateBasket(CustomerBasketDto model)
+        public async Task<IActionResult> CreateOrUpdateBasket(CustomerBasketDto model)
         {
 
-            var basket = await basketRepository.UpdateBasketAsync(mapper.Map<CustomerBasket>(model));
+            var basket = await basketServices.UpdateBasketAsync(model);
 
             if (basket is null) return BadRequest(new ApiErrorResponse(StatusCodes.Status400BadRequest));
 
@@ -48,10 +50,15 @@ namespace Store.Apis.Controllers
 
 
         [HttpDelete]
-        public async Task DeleteBasket(string basketId)
+        public async Task<IActionResult> DeleteBasket(string basketId)
         {
-             await basketRepository.DeleteBasketAsync(basketId);
+            if (basketId is null) return BadRequest(new ApiErrorResponse(400));
 
+            var flag = await basketServices.DeleteBasketAsync(basketId);
+
+            if (flag is false) return BadRequest(new ApiErrorResponse(400));
+            
+            return NoContent();
         }
 
 

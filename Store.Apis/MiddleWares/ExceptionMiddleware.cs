@@ -39,10 +39,15 @@ namespace Store.Apis.MiddleWares
                     new ApiExceptionResponse(StatusCodes.Status500InternalServerError,ex.Message,ex.StackTrace.ToString())
                     : new ApiExceptionResponse(StatusCodes.Status500InternalServerError);
 
+                //Naming of response when it return return into camelCase
+                var options = new JsonSerializerOptions()
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                };
                 //To Convert Any Type into Json File
-                var json = JsonSerializer.Serialize(res);
+                var json = JsonSerializer.Serialize(res,options);
                 //Return the Error to the Body of the Response
-                context.Response.WriteAsync(json);
+                await context.Response.WriteAsync(json);
 
                 //Will complete till the endpoint if the endpoint sends an exception
                 //it will Log the exception and send it to the response (more readable)

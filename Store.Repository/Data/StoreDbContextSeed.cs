@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Store.Core.Entities;
+using Store.Core.Entities.Order;
 using Store.Repository.Data.Contexts;
 using System;
 using System.Collections.Generic;
@@ -83,7 +84,26 @@ namespace Store.Repository.Data
             }
 
 
+
+            if (context.DeliveryMethods.Count() == 0)
+            {
+                //1) Get Data From json file
+                var DeliveryData = File.ReadAllText(@"..\Store.Repository\Data\DataSeed\delivery.json");
+
+                //2) Convert Json string to List 
+                var deliveryMethods = JsonSerializer.Deserialize<List<DeliveryMethod>>(DeliveryData);
+
+                //3) Check and add data to Database
+            
+                if(deliveryMethods is not null)
+                {
+                    await context.DeliveryMethods.AddRangeAsync(deliveryMethods);
+                    await context.SaveChangesAsync();
+                }
+
+                }
+            }
+
         }
 
     }
-}

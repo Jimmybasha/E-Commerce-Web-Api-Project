@@ -11,6 +11,17 @@ using Store.Core.Repositories.Contract;
 using Store.Repository.Repository;
 using StackExchange.Redis;
 using Store.Core.Mapping.Basket;
+using Store.Service.Services.Basket;
+using Store.Service.Services.Caches;
+using Store.Repository.Data.Identity.Contexts;
+using Store.Core.Entities.Identity;
+using Microsoft.AspNetCore.Identity;
+using Store.Service.Services.User;
+using Store.Service.Services.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Store.Core.Mapping.Auth;
 
 namespace Store.Apis.Helper
 {
@@ -26,6 +37,8 @@ namespace Store.Apis.Helper
             services.AddUserDefinedServices();
             services.AddAutoMapperServices(configuration);
             services.ConfigureInvalidModelStateResponseService();
+            services.AddIdentityServices();
+            services.AddAuthenticationService(configuration);
 
 
             return services;
@@ -39,6 +52,16 @@ namespace Store.Apis.Helper
 
             return services;
         }
+
+        private static IServiceCollection AddIdentityServices(this IServiceCollection services)
+        {
+            //Inject All Identity Built in Services
+            services.AddIdentity<AppUser, IdentityRole>()
+                    .AddEntityFrameworkStores<StoreIdentityDbContext>();
+
+            return services;
+        }
+
         private static IServiceCollection AddSwaggerService(this IServiceCollection services)
         {
 
@@ -56,12 +79,24 @@ namespace Store.Apis.Helper
                 option.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
 
+            services.AddDbContext<StoreIdentityDbContext>(option =>
+            {
+                //Get the Connection String from the AppSettings in => DefaultConnection Key
+                option.UseSqlServer(configuration.GetConnectionString("IdentityConnection"));
+            });
+
+            return services;
+
             return services;
         } 
         private static IServiceCollection AddUserDefinedServices(this IServiceCollection services)
         {
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IBasketRepository, BasketRepository>();
+            services.AddScoped<ICacheServices, CacheService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IBasketServices, BasketService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             return services;
         }
@@ -69,6 +104,7 @@ namespace Store.Apis.Helper
         {
             services.AddAutoMapper(M => M.AddProfile(new ProductProfile(configuration)));
             services.AddAutoMapper(M => M.AddProfile(new BasketProfile()));
+            services.AddAutoMapper(M => M.AddProfile(new AuthenticationProfile()));
             return services;
         }
         
@@ -103,7 +139,6 @@ namespace Store.Apis.Helper
             return services;
         }
 
-
         private static IServiceCollection AddRedisService(this IServiceCollection services , IConfiguration configuration)
         {
             services.AddSingleton<IConnectionMultiplexer>((serviceProvider) =>
@@ -118,6 +153,33 @@ namespace Store.Apis.Helper
 
 
             return services;
+        }
+
+
+        private static IServiceCollection AddAuthenticationService(this IServiceCollection services, IConfiguration configuration)
+        {
+            //Auth for the JWT I Created .
+            services.AddAuthentication(options =>
+            {
+
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+            }).AddJwtBearer(options =>
+            options.TokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidateIssuer = true,
+                ValidIssuer = configuration["Jwt:Issuer"],
+                ValidateAudience = true,
+                ValidAudience = configuration["Jwt:Audience"],
+                ValidateLifetime = true,
+                ValidateSignatureLast = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+            });
+
+
+            return services;
+
         }
 
 

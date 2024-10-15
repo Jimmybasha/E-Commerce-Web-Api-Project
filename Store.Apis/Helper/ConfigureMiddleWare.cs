@@ -2,28 +2,37 @@
 using Store.Repository.Data.Contexts;
 using Store.Repository.Data;
 using Microsoft.EntityFrameworkCore;
+using Store.Repository.Data.Identity.Contexts;
+using Store.Repository.Data.Identity;
+using Microsoft.AspNetCore.Identity;
+using Store.Core.Entities.Identity;
 
 namespace Store.Apis.Helper
 {
     static public class ConfigureMiddleWare
     {
 
-        public static async Task<WebApplication> ConfigureMiddlewaresAsync(this WebApplication app)
-        {
+        public static async Task<WebApplication> ConfigureMiddlewaresAsync(this WebApplication app )
+         {
 
             //To Create Dependency injection bcz the storeDbContext needs an option and i can't provide it here
             using var scope = app.Services.CreateScope();
 
             var services = scope.ServiceProvider;
 
-            var context = services.GetRequiredService<StoreDbContext>();
+            var context = services.GetRequiredService<StoreDbContext>(); // Ask Clr to create object StoreDbContext
+            var identityDbContext = services.GetRequiredService<StoreIdentityDbContext>(); // Ask Clr to create object StoreIdentityDbContext
             //Service to use logger
             var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+            var userManager = services.GetRequiredService<UserManager<AppUser>>();
             try
             {
                 await context.Database.MigrateAsync();
                 //Add After Updating Database , and take the same context 
                 await StoreDbContextSeed.SeedAsync(context);
+                await identityDbContext.Database.MigrateAsync();
+                await StoreIdentityDbContextSeed.SeedAppUserAsync(userManager);
+
             }
             catch (Exception ex)
             {

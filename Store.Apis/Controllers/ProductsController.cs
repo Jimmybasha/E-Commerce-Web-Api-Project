@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Store.Apis.Attributes;
 using Store.Apis.Errors;
 using Store.Core;
 using Store.Core.Dtos.Products;
@@ -20,7 +22,18 @@ namespace Store.Apis.Controllers
             this.productService = productService;
         }
 
+        [ProducesResponseType(typeof(PaginationResponse<ProductDto>), StatusCodes.Status200OK)]
+        [HttpGet]
+        [Cached(100)]
+        [Authorize]
+        //sort :name,priceAsc,priceDesc
+        public async Task<ActionResult<PaginationResponse<ProductDto>>> GetAllProducts([FromQuery] ProductSpecParams productSpec) // Endpoint 
+        {
 
+            var result = await productService.getAllProductsAsync(productSpec);
+            return Ok(result);
+
+        }
 
         [ProducesResponseType(typeof(ProductDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
@@ -36,21 +49,10 @@ namespace Store.Apis.Controllers
         }
 
 
-        [ProducesResponseType(typeof(PaginationResponse<ProductDto>), StatusCodes.Status200OK)]
-        [HttpGet]
-        //sort :name,priceAsc,priceDesc
-        public async Task<ActionResult<PaginationResponse<ProductDto>>> GetAllProducts([FromQuery]ProductSpecParams productSpec) // Endpoint 
-        { 
-
-            var result = await productService.getAllProductsAsync(productSpec);
-            return Ok(result);
-
-        }
-
-
-
         [ProducesResponseType(typeof(PaginationResponse<TypeBrandDto>), StatusCodes.Status200OK)]
         [HttpGet("types")]
+        [Authorize]
+
         public async Task<ActionResult<IEnumerable<TypeBrandDto>>> GetAllTypes() // Endpoint
         {
 
@@ -61,6 +63,7 @@ namespace Store.Apis.Controllers
 
         [ProducesResponseType(typeof(PaginationResponse<TypeBrandDto>), StatusCodes.Status200OK)]
         [HttpGet("brands")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<TypeBrandDto>>> GetAllBrands() // Endpoint
         {
 
