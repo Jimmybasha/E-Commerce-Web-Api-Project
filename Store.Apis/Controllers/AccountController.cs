@@ -92,28 +92,28 @@ namespace Store.Apis.Controllers
         //I'll give it the BearerToken and return the user with this token
         [HttpGet("address")]
         [Authorize]
-        public async Task<ActionResult<AddressDto>> GetCurrentUserAddress()
+        public async Task<ActionResult<AuthAddressDto>> GetCurrentUserAddress()
         {
 
             var user = await userManager.FindByEmailWithAddressAsync(User);
 
             if (user is null) return BadRequest(new ApiErrorResponse(StatusCodes.Status400BadRequest));
 
-            return Ok(mapper.Map<AddressDto>(user.Address));
+            return Ok(mapper.Map<AuthAddressDto>(user.Address));
 
         }
 
 
         [HttpPut("address")]
         [Authorize]
-        public async Task<ActionResult<AddressDto>> UpdateCurrentUserAddress(AddressDto addressDto)
+        public async Task<ActionResult<AuthAddressDto>> UpdateCurrentUserAddress(AuthAddressDto addressDto)
         {
 
             var user = await userManager.FindByEmailWithAddressAsync(User);
 
             if (user is null) return BadRequest(new ApiErrorResponse(StatusCodes.Status400BadRequest));
 
-            var mappedAddress = mapper.Map<AddressDto, Address>(addressDto);
+            var mappedAddress = mapper.Map<AuthAddressDto, Address>(addressDto);
 
             //Address returns with 0 Id so it will remove it and create new one
             // So i gave it the id that came from the user before updating

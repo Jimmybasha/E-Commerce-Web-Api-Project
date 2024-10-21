@@ -12,11 +12,15 @@ namespace Store.Core.Entities.Order
         {
         }
 
-        public OrderItem(ProductItemOrder product, decimal price, int quantity)
+
+
+
+        public OrderItem(ProductItemOrder product, decimal price, int quantity,string name)
         {
             this.Product = product;
             Price = price;
             Quantity = quantity;
+            Name = name;
         }
 
         public ProductItemOrder Product { get; set; }

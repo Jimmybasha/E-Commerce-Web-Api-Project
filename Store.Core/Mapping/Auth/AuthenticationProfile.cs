@@ -14,7 +14,7 @@ namespace Store.Core.Mapping.Auth
 
         public AuthenticationProfile()
         {
-            CreateMap<Address, AddressDto>().ReverseMap();
+            CreateMap<Address, AuthAddressDto>().ReverseMap();
         }
 
 

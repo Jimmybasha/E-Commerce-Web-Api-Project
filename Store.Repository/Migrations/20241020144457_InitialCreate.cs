@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Store.Repository.Data.Migrations
+namespace Store.Repository.Migrations
 {
     /// <inheritdoc />
-    public partial class InitStoreTables : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -63,6 +63,7 @@ namespace Store.Repository.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     BuyerEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     OrderDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -74,7 +75,6 @@ namespace Store.Repository.Data.Migrations
                     DeliveryMethodId = table.Column<int>(type: "int", nullable: false),
                     Subtotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PaymentIntentId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreateAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>

@@ -57,7 +57,6 @@ namespace Store.Repository.Repository
         public async Task AddAsync(TEntity entity)
         {
             await context.AddAsync(entity);
-            await context.SaveChangesAsync();
         }
 
         public void Update(TEntity entity)

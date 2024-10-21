@@ -9,11 +9,11 @@ using Store.Repository.Data.Contexts;
 
 #nullable disable
 
-namespace Store.Repository.Data.Migrations
+namespace Store.Repository.Migrations
 {
     [DbContext(typeof(StoreDbContext))]
-    [Migration("20241015215649_InitStoreTables")]
-    partial class InitStoreTables
+    [Migration("20241020144457_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -79,7 +79,6 @@ namespace Store.Repository.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTimeOffset>("OrderDate")

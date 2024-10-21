@@ -22,6 +22,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Store.Core.Mapping.Auth;
+using Store.Core.Mapping.Orders;
+using Store.Service.Services.Orders;
+using Store.Service.Services.Payments;
 
 namespace Store.Apis.Helper
 {
@@ -39,6 +42,7 @@ namespace Store.Apis.Helper
             services.ConfigureInvalidModelStateResponseService();
             services.AddIdentityServices();
             services.AddAuthenticationService(configuration);
+            services.ConfigureCors();
 
 
             return services;
@@ -95,8 +99,10 @@ namespace Store.Apis.Helper
             services.AddScoped<IBasketRepository, BasketRepository>();
             services.AddScoped<ICacheServices, CacheService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IBasketServices, BasketService>();
+            services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             return services;
         }
@@ -105,6 +111,7 @@ namespace Store.Apis.Helper
             services.AddAutoMapper(M => M.AddProfile(new ProductProfile(configuration)));
             services.AddAutoMapper(M => M.AddProfile(new BasketProfile()));
             services.AddAutoMapper(M => M.AddProfile(new AuthenticationProfile()));
+            services.AddAutoMapper(M => M.AddProfile(new OrderProfile(configuration)));
             return services;
         }
         
@@ -165,7 +172,8 @@ namespace Store.Apis.Helper
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 
-            }).AddJwtBearer(options =>
+            }
+            ).AddJwtBearer(options =>
             options.TokenValidationParameters = new TokenValidationParameters()
             {
                 ValidateIssuer = true,
@@ -182,7 +190,20 @@ namespace Store.Apis.Helper
 
         }
 
+        public static void ConfigureCors(this IServiceCollection services)
+        {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                });
+            });
 
+
+        }
 
 
 

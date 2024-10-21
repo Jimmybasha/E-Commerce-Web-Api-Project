@@ -8,7 +8,7 @@ using Store.Repository.Data.Contexts;
 
 #nullable disable
 
-namespace Store.Repository.Data.Migrations
+namespace Store.Repository.Migrations
 {
     [DbContext(typeof(StoreDbContext))]
     partial class StoreDbContextModelSnapshot : ModelSnapshot
@@ -76,7 +76,6 @@ namespace Store.Repository.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTimeOffset>("OrderDate")

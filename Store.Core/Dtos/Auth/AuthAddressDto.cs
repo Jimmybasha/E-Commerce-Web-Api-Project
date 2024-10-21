@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Store.Core.Dtos.Auth
 {
-    public class AddressDto
+    public class AuthAddressDto
     {
 
 

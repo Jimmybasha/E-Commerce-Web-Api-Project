@@ -13,6 +13,10 @@ namespace Store.Core.Entities
 
         public List<BasketItem> Items { get; set; }
 
+        public int? DeliveryMethodId { get; set; }
 
+        public string? PaymentIntentId { get; set; }
+
+        public string? ClientSecret { get; set; } //Token of the User for privacy.
     }
 }

@@ -9,6 +9,24 @@ namespace Store.Core.Entities.Order
     public class Order:BaseEntity<int> 
     {
 
+
+        public Order()
+        {
+            
+        }
+        public Order(string buyerEmail, Address shippingAddress, DeliveryMethod deliveryMethod, ICollection<OrderItem> items, decimal subtotal, string paymentIntentId,string? name)
+        {
+            BuyerEmail = buyerEmail;
+            ShippingAddress = shippingAddress;
+            DeliveryMethod = deliveryMethod;
+            Items = items;
+            Subtotal = subtotal;
+            PaymentIntentId = paymentIntentId;
+            Name = name ;
+        }
+
+        public new string? Name { get; set; }
+
         public string BuyerEmail { get; set; }
 
         public DateTimeOffset OrderDate { get; set; } = DateTimeOffset.Now;
